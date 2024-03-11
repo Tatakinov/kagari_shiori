@@ -1,30 +1,25 @@
 #include "kagari.h"
 
 #include <iostream>
-#include <string>
 
-#define SOL_ALL_SAFETIES_ON 1
-#include "sol/sol.hpp"
-
+namespace {
 #if defined(_WIN32)
-const char *kDirSep = "\\";
-const char *kExt        = "dll";
-#elif defined(__linux__)
-const char *kDirSep = "/";
-const char *kExt        = "so";
+    const char *kDirSep = "\\";
+    const char *kExt        = "dll";
+#elif defined(__unix__)
+    const char *kDirSep = "/";
+    const char *kExt        = "so";
 #else
 #error "Not Supported"
 #endif // OS
 
-const char *kCraftMan = "Tatakinov";
-const char *kCRLF = "\x0d\x0a";
+    const char *kCraftMan = "Tatakinov";
+    const char *kCRLF = "\x0d\x0a";
+}
 
-static sol::state lua;
-static sol::table module;
-
-bool __load(std::string path) {
+bool Shiori::load(std::string path) {
     bool ret    = false;
-    lua.open_libraries(
+    lua_.open_libraries(
         sol::lib::base,
         sol::lib::package,
         sol::lib::coroutine,
@@ -35,26 +30,26 @@ bool __load(std::string path) {
         sol::lib::io,
         sol::lib::debug
     );
-    std::string package_path    = lua["package"]["path"];
+    std::string package_path    = lua_["package"]["path"];
     package_path    = path + "?.lua;"
         + path + "?" + kDirSep + "init.lua;"
         + path + "corelib" + kDirSep + "?.lua;"
         + path + "corelib" + kDirSep + "?" + kDirSep + "init.lua;"
         + path + "lib" + kDirSep + "?.lua;"
         + path + "lib" + kDirSep + "?" + kDirSep + "init.lua";
-    std::string package_cpath    = lua["package"]["cpath"];
+    std::string package_cpath    = lua_["package"]["cpath"];
     package_cpath = path + "?." + kExt + ";"
         + path + "?" + kDirSep + "init." + kExt + ";"
         + path + "corelib" + kDirSep + "?." + kExt + ";"
         + path + "corelib" + kDirSep + "?" + kDirSep + "init." + kExt + ";"
         + path + "lib" + kDirSep + "?." + kExt + ";"
         + path + "lib" + kDirSep + "?" + kDirSep + "init." + kExt;
-    lua["package"]["path"]    = package_path;
-    lua["package"]["cpath"] = package_cpath;
+    lua_["package"]["path"]    = package_path;
+    lua_["package"]["cpath"] = package_cpath;
     try {
-        auto result = lua.safe_script_file(path + "index.lua");
+        auto result = lua_.safe_script_file(path + "index.lua");
         if (result.valid()) {
-            module    = result;
+            module_ = result;
         }
         else {
             sol::error err  = result;
@@ -70,7 +65,7 @@ bool __load(std::string path) {
             std::cout << "Error(load script file)" << std::endl;
             return false;
     }
-    sol::protected_function pf    = module["load"];
+    sol::protected_function pf    = module_["load"];
     auto result = pf(path);
     if (result.valid()) {
         ret = result;
@@ -82,9 +77,9 @@ bool __load(std::string path) {
     return ret;
 }
 
-bool __unload() {
+bool Shiori::unload() {
     bool ret    = false;
-    sol::protected_function pf    = module["unload"];
+    sol::protected_function pf    = module_["unload"];
     auto result = pf();
     if (result.valid()) {
         ret = result;
@@ -96,10 +91,10 @@ bool __unload() {
     return ret;
 }
 
-std::string __request(std::string request) {
+std::string Shiori::request(std::string request) {
     using namespace std::literals::string_literals;
     std::string ret;
-    sol::protected_function pf    = module["request"];
+    sol::protected_function pf    = module_["request"];
     auto result = pf(request);
     if (result.valid()) {
         ret = result;

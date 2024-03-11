@@ -3,8 +3,19 @@
 
 #include <string>
 
-bool        __load(std::string path);
-bool        __unload();
-std::string __request(std::string request);
+#define SOL_ALL_SAFETIES_ON 1
+#include "sol/sol.hpp"
+
+class Shiori {
+    private:
+        sol::state lua_;
+        sol::table module_;
+    public:
+        Shiori() {}
+        ~Shiori() {}
+        bool load(std::string path);
+        bool unload();
+        std::string request(std::string request);
+};
 
 #endif // _KAGARI_H_
