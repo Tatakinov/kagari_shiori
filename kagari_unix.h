@@ -5,9 +5,9 @@
 extern "C" {
 #endif // __cplusplus
 
-    int load(char *path, long len);
-    int unload(int id);
-    char *request(int id, char *req, long *len);
+    int kagari_load(char *path, long len);
+    int kagari_unload(int id);
+    char *kagari_request(int id, char *req, long *len);
 
 #ifdef __cplusplus
 }

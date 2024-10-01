@@ -11,7 +11,7 @@ namespace {
     std::unordered_map<int, std::shared_ptr<Shiori>> shiori;
 }
 
-int load(char *path, long len) {
+int kagari_load(char *path, long len) {
     std::string p(path, len);
     free(path);
     for (int i = 0; i < 1000; i++) {
@@ -24,7 +24,7 @@ int load(char *path, long len) {
     return -1;
 }
 
-int unload(int id) {
+int kagari_unload(int id) {
     if (shiori.count(id) == 0) {
         return -1;
     }
@@ -33,7 +33,7 @@ int unload(int id) {
     return ret;
 }
 
-char *request(int id, char *req, long *len) {
+char *kagari_request(int id, char *req, long *len) {
     std::string r(req, *len);
     free(req);
     if (shiori.count(id) == 0) {
